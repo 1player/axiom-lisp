@@ -1,10 +1,7 @@
-use std::io;
-
-#[derive(Clone, Debug)]
-enum Expr {
-    Symbol(String),
-    Number(usize),
-    List(Vec<Expr>),
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Expr<'a> {
+    Symbol(&'a str),
+    List(Vec<Expr<'a>>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -53,17 +50,72 @@ fn tokenize<'a>(input: &'a str) -> Vec<Token<'a>> {
     tokens
 }
 
-fn read() -> io::Result<Expr> {
-    let mut buf = String::new();
-    io::stdin().read_line(&mut buf)?;
+#[derive(Debug, PartialEq, Eq)]
+enum ParseError {
+    UnexpectedEOF,
+}
 
-    Ok(Expr::Number(10))
+fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr<'a>, ParseError> {
+    let mut index = None;
+    let mut expr_stack: Vec<Vec<Expr<'a>>> = vec![];
+
+    for token in tokens {
+        match token {
+            Token::OpenParen => {
+                index = if let Some(i) = index {
+                    Some(i + 1)
+                } else {
+                    Some(0)
+                };
+
+                expr_stack.push(vec![]);
+            }
+            Token::CloseParen => {
+                if let Some(i) = index {
+                    let expr = Expr::List(expr_stack.pop().unwrap());
+                    if i >= 1 {
+                        expr_stack[i - 1].push(expr);
+                        index = Some(i - 1);
+                    } else {
+                        return Ok(expr);
+                    }
+                } else {
+                    return Err(ParseError::UnexpectedEOF);
+                }
+            }
+            Token::Atom(atom) => {
+                let symbol = Expr::Symbol(atom);
+                if let Some(i) = index {
+                    expr_stack[i].push(symbol);
+                } else {
+                    return Ok(symbol);
+                }
+            }
+        }
+    }
+
+    Err(ParseError::UnexpectedEOF)
+}
+
+fn read<'a>(input: &'a str) -> Result<Expr<'a>, ParseError> {
+    let tokens = tokenize(input);
+    parse(&tokens)
 }
 
 fn repl() {
-    eprint!("> ");
-    let expr = read().unwrap();
-    eprintln!("{:?}", expr);
+    let mut buf = String::new();
+
+    loop {
+        eprint!("> ");
+        std::io::stdin().read_line(&mut buf).unwrap();
+
+        match read(&buf) {
+            Ok(expr) => eprintln!("{:?}", expr),
+            Err(ParseError::UnexpectedEOF) => eprintln!("Unexpected EOF"),
+        }
+
+        buf.clear();
+    }
 }
 
 fn main() {
@@ -92,6 +144,39 @@ mod tests {
                 Token::Atom("foo"),
                 Token::Atom("bar"),
             ]
+        );
+    }
+
+    #[test]
+    fn test_read() {
+        assert_eq!(read(""), Err(ParseError::UnexpectedEOF));
+
+        assert_eq!(read("5"), Ok(Expr::Symbol("5")));
+
+        assert_eq!(read("a b"), Ok(Expr::Symbol("a")));
+
+        assert_eq!(
+            read("(* x y)"),
+            Ok(Expr::List(vec![
+                Expr::Symbol("*"),
+                Expr::Symbol("x"),
+                Expr::Symbol("y"),
+            ]))
+        );
+
+        assert_eq!(read("(* x y"), Err(ParseError::UnexpectedEOF));
+
+        assert_eq!(
+            read("(* (+ a b) c)"),
+            Ok(Expr::List(vec![
+                Expr::Symbol("*"),
+                Expr::List(vec![
+                    Expr::Symbol("+"),
+                    Expr::Symbol("a"),
+                    Expr::Symbol("b"),
+                ]),
+                Expr::Symbol("c"),
+            ]))
         );
     }
 }
