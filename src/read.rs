@@ -51,9 +51,9 @@ fn tokenize<'a>(input: &'a str) -> Vec<Token<'a>> {
     tokens
 }
 
-fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr<'a>, ParseError> {
+fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr, ParseError> {
     let mut index = None;
-    let mut expr_stack: Vec<Vec<Expr<'a>>> = vec![];
+    let mut expr_stack: Vec<Vec<Expr>> = vec![];
 
     for token in tokens {
         match token {
@@ -80,7 +80,7 @@ fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr<'a>, ParseError> {
                 }
             }
             Token::Atom(atom) => {
-                let symbol = Expr::Symbol(atom);
+                let symbol = Expr::Symbol((*atom).to_owned());
                 if let Some(i) = index {
                     expr_stack[i].push(symbol);
                 } else {
@@ -93,7 +93,7 @@ fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr<'a>, ParseError> {
     Err(ParseError::UnexpectedEOF)
 }
 
-pub fn read<'a>(input: &'a str) -> Result<Expr<'a>, ParseError> {
+pub fn read(input: &str) -> Result<Expr, ParseError> {
     let tokens = tokenize(input);
     parse(&tokens)
 }
@@ -127,16 +127,16 @@ mod tests {
     fn test_read() {
         assert_eq!(read(""), Err(ParseError::UnexpectedEOF));
 
-        assert_eq!(read("5"), Ok(Expr::Symbol("5")));
+        assert_eq!(read("5"), Ok(Expr::Symbol("5".into())));
 
-        assert_eq!(read("a b"), Ok(Expr::Symbol("a")));
+        assert_eq!(read("a b"), Ok(Expr::Symbol("a".into())));
 
         assert_eq!(
             read("(* x y)"),
             Ok(Expr::List(vec![
-                Expr::Symbol("*"),
-                Expr::Symbol("x"),
-                Expr::Symbol("y"),
+                Expr::Symbol("*".into()),
+                Expr::Symbol("x".into()),
+                Expr::Symbol("y".into()),
             ]))
         );
 
@@ -145,13 +145,13 @@ mod tests {
         assert_eq!(
             read("(* (+ a b) c)"),
             Ok(Expr::List(vec![
-                Expr::Symbol("*"),
+                Expr::Symbol("*".into()),
                 Expr::List(vec![
-                    Expr::Symbol("+"),
-                    Expr::Symbol("a"),
-                    Expr::Symbol("b"),
+                    Expr::Symbol("+".into()),
+                    Expr::Symbol("a".into()),
+                    Expr::Symbol("b".into()),
                 ]),
-                Expr::Symbol("c"),
+                Expr::Symbol("c".into()),
             ]))
         );
     }

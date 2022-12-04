@@ -1,10 +1,10 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Expr<'a> {
-    Symbol(&'a str),
-    List(Vec<Expr<'a>>),
+pub enum Expr {
+    Symbol(String),
+    List(Vec<Expr>),
 }
 
-impl<'a> std::fmt::Display for Expr<'a> {
+impl std::fmt::Display for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Expr::Symbol(s) => write!(f, "{}", s),
@@ -16,28 +16,41 @@ impl<'a> std::fmt::Display for Expr<'a> {
     }
 }
 
+impl Expr {
+    pub fn expect_symbol(&self) -> Option<&str> {
+        if let Expr::Symbol(s) = self {
+            Some(s)
+        } else {
+            None
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_display() {
-        assert_eq!(Expr::Symbol("a").to_string(), "a");
-        assert_eq!(Expr::List(vec![Expr::Symbol("a")]).to_string(), "(a)");
+        assert_eq!(Expr::Symbol("a".into()).to_string(), "a");
         assert_eq!(
-            Expr::List(vec![Expr::Symbol("a"), Expr::Symbol("b")]).to_string(),
+            Expr::List(vec![Expr::Symbol("a".into())]).to_string(),
+            "(a)"
+        );
+        assert_eq!(
+            Expr::List(vec![Expr::Symbol("a".into()), Expr::Symbol("b".into())]).to_string(),
             "(a b)"
         );
         assert_eq!(
             Expr::List(vec![
-                Expr::Symbol("values"),
-                Expr::Symbol("b"),
+                Expr::Symbol("values".into()),
+                Expr::Symbol("b".into()),
                 Expr::List(vec![
-                    Expr::Symbol("+"),
-                    Expr::Symbol("a"),
-                    Expr::Symbol("b")
+                    Expr::Symbol("+".into()),
+                    Expr::Symbol("a".into()),
+                    Expr::Symbol("b".into())
                 ],),
-                Expr::Symbol("c")
+                Expr::Symbol("c".into())
             ])
             .to_string(),
             "(values b (+ a b) c)"
