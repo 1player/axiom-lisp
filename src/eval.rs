@@ -24,10 +24,7 @@ fn eval_list(first: Expr, rest: &[Expr], env: &mut Env) -> Result<Expr, EvalErro
 
 pub fn eval(expr: Expr, env: &mut Env) -> Result<Expr, EvalError> {
     match expr {
-        Expr::Symbol(s) => env
-            .get(&s)
-            .map(|e| e.clone())
-            .ok_or(EvalError::UndefinedSymbol(s.to_owned())),
+        Expr::Symbol(s) => env.get(&s).ok_or(EvalError::UndefinedSymbol(s.to_owned())),
         Expr::List(ref exprs) => {
             if exprs.len() > 0 {
                 eval_list(exprs[0].clone(), &exprs[1..], env)

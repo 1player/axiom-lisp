@@ -5,7 +5,7 @@ mod read;
 
 fn repl() {
     let mut buf = String::new();
-    let mut env = env::Env::new();
+    let mut env = env::Env::new(None);
 
     loop {
         eprint!("> ");
