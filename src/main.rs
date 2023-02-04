@@ -1,3 +1,4 @@
+mod builtin;
 mod env;
 mod eval;
 mod expr;
@@ -16,7 +17,7 @@ fn repl() {
         }
 
         match read::read(&buf) {
-            Ok(expr) => match eval::eval(expr, &mut env) {
+            Ok(expr) => match eval::eval(&expr, &mut env) {
                 Ok(expr) => eprintln!("{}", expr),
                 Err(e) => eprintln!("error: {:?}", e),
             },

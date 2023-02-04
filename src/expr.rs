@@ -20,14 +20,6 @@ impl Expr {
     pub fn new_symbol(s: &str) -> Expr {
         Expr::Symbol(s.to_owned())
     }
-
-    pub fn expect_symbol(&self) -> Option<&str> {
-        if let Expr::Symbol(s) = self {
-            Some(s)
-        } else {
-            None
-        }
-    }
 }
 
 #[cfg(test)]
