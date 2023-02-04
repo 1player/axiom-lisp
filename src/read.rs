@@ -81,17 +81,25 @@ fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr, ParseError> {
                 }
             }
             Token::Atom(atom) => {
-                let symbol = Expr::Symbol((*atom).to_owned());
+                let expr = parse_atom(atom)?;
                 if let Some(i) = index {
-                    expr_stack[i].push(symbol);
+                    expr_stack[i].push(expr);
                 } else {
-                    return Ok(symbol);
+                    return Ok(expr);
                 }
             }
         }
     }
 
     Err(ParseError::UnexpectedEOF)
+}
+
+fn parse_atom(atom: &str) -> Result<Expr, ParseError> {
+    // try parsing as an integer first
+    match atom.parse::<isize>() {
+        Ok(n) => Ok(Expr::Integer(n)),
+        _ => Ok(Expr::Symbol((*atom).to_owned())),
+    }
 }
 
 pub fn read(input: &str) -> Result<Expr, ParseError> {
@@ -131,7 +139,7 @@ mod tests {
     fn test_read() {
         assert_eq!(read(""), Err(ParseError::Empty));
 
-        assert_eq!(read("5"), Ok(Expr::Symbol("5".into())));
+        assert_eq!(read("5"), Ok(Expr::Integer(5)));
 
         assert_eq!(read("a b"), Ok(Expr::Symbol("a".into())));
 
@@ -147,7 +155,7 @@ mod tests {
         assert_eq!(read("(* x y"), Err(ParseError::UnexpectedEOF));
 
         assert_eq!(
-            read("(* (+ a b) c)"),
+            read("(* (+ a b) 4)"),
             Ok(Expr::List(vec![
                 Expr::Symbol("*".into()),
                 Expr::List(vec![
@@ -155,7 +163,7 @@ mod tests {
                     Expr::Symbol("a".into()),
                     Expr::Symbol("b".into()),
                 ]),
-                Expr::Symbol("c".into()),
+                Expr::Integer(4),
             ]))
         );
     }

@@ -11,6 +11,7 @@ pub enum EvalError {
 
 pub fn eval(expr: &Expr, env: &mut Env) -> Result<Expr, EvalError> {
     match expr {
+        Expr::Integer(_) => Ok(expr.clone()),
         Expr::Symbol(s) => eval_symbol(s, env),
         Expr::List(exprs) => eval_list(exprs, env),
     }

@@ -1,5 +1,6 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Expr {
+    Integer(isize),
     Symbol(String),
     List(Vec<Expr>),
 }
@@ -8,6 +9,7 @@ impl std::fmt::Display for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Expr::Symbol(s) => write!(f, "{}", s),
+            Expr::Integer(n) => write!(f, "{}", n),
             Expr::List(exprs) => {
                 let inner: Vec<_> = exprs.iter().map(|e| format!("{}", e)).collect();
                 write!(f, "({})", inner.join(" "))
@@ -43,13 +45,13 @@ mod tests {
                 Expr::Symbol("b".into()),
                 Expr::List(vec![
                     Expr::Symbol("+".into()),
-                    Expr::Symbol("a".into()),
+                    Expr::Integer(1),
                     Expr::Symbol("b".into())
                 ],),
                 Expr::Symbol("c".into())
             ])
             .to_string(),
-            "(values b (+ a b) c)"
+            "(values b (+ 1 b) c)"
         );
     }
 }
