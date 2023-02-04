@@ -1,6 +1,5 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-
 use std::rc::Rc;
 
 use crate::expr::Expr;
@@ -11,63 +10,50 @@ struct EnvInner {
 }
 
 impl EnvInner {
-    pub fn new(parent: Option<Rc<RefCell<EnvInner>>>) -> Self {
+    fn new(parent: Option<Rc<RefCell<EnvInner>>>) -> Self {
         Self {
             parent,
             slots: HashMap::new(),
         }
     }
 
-    pub fn get(&self, name: &str) -> Option<Expr> {
+    fn get(&self, name: &str) -> Option<Expr> {
         self.slots
             .get(name)
             .cloned()
             .or_else(|| self.parent.as_ref().map(|p| p.borrow().get(name)).flatten())
     }
 
-    pub fn set(&mut self, name: &str, value: Expr) {
+    fn set(&mut self, name: &str, value: Expr) {
         self.slots.insert(name.to_owned(), value);
     }
 }
 
-pub struct Env {
-    e: Rc<RefCell<EnvInner>>,
-}
+// The public wrapper to hide the whole Rc<RefCell> dance
+// and have a more ergonomic API
+pub struct Env(Rc<RefCell<EnvInner>>);
 
 impl Env {
     pub fn new(parent: Option<&Env>) -> Self {
-        let parent = parent.map(|p| p.e.clone());
-
-        Self {
-            e: Rc::new(RefCell::new(EnvInner::new(parent))),
-        }
+        let parent = parent.map(|p| p.0.clone());
+        Self(Rc::new(RefCell::new(EnvInner::new(parent))))
     }
 
     pub fn get(&self, name: &str) -> Option<Expr> {
-        self.e.borrow().get(name)
+        self.0.borrow().get(name)
     }
 
     pub fn set(&mut self, name: &str, value: Expr) {
-        self.e.borrow_mut().set(name, value);
+        self.0.borrow_mut().set(name, value);
     }
 }
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]
-    fn test_get_set() {
-        let mut env = Env::new(None);
-        assert!(env.get("foo").is_none());
-
-        env.set("foo", Expr::new_symbol("bar"));
-        assert_eq!(env.get("foo").unwrap(), Expr::new_symbol("bar"));
-    }
-
-    #[test]
-    fn test_nested() {
+    fn test_nested_environments() {
         let mut parent = Env::new(None);
         let mut child = Env::new(Some(&parent));
 
