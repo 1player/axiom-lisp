@@ -9,7 +9,11 @@ fn repl() {
 
     loop {
         eprint!("> ");
-        std::io::stdin().read_line(&mut buf).unwrap();
+        let bytes_read = std::io::stdin().read_line(&mut buf).unwrap();
+
+        if bytes_read == 0 {
+            break;
+        }
 
         match read::read(&buf) {
             Ok(expr) => match eval::eval(expr, &mut env) {
