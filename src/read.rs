@@ -3,6 +3,7 @@ use crate::expr::Expr;
 #[derive(Debug, PartialEq, Eq)]
 pub enum ParseError {
     UnexpectedEOF,
+    Empty,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -95,6 +96,9 @@ fn parse<'a>(tokens: &[Token<'a>]) -> Result<Expr, ParseError> {
 
 pub fn read(input: &str) -> Result<Expr, ParseError> {
     let tokens = tokenize(input);
+    if tokens.len() == 0 {
+        return Err(ParseError::Empty);
+    }
     parse(&tokens)
 }
 
@@ -125,7 +129,7 @@ mod tests {
 
     #[test]
     fn test_read() {
-        assert_eq!(read(""), Err(ParseError::UnexpectedEOF));
+        assert_eq!(read(""), Err(ParseError::Empty));
 
         assert_eq!(read("5"), Ok(Expr::Symbol("5".into())));
 

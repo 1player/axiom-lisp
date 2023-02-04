@@ -21,6 +21,7 @@ fn repl() {
                 Err(e) => eprintln!("error: {:?}", e),
             },
             Err(read::ParseError::UnexpectedEOF) => eprintln!("Unexpected EOF"),
+            Err(read::ParseError::Empty) => (),
         }
 
         buf.clear();
