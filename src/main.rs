@@ -4,9 +4,14 @@ mod eval;
 mod expr;
 mod read;
 
+use builtin::*;
+
 fn repl() {
     let mut buf = String::new();
     let mut env = env::Env::new(None);
+
+    env.set("car", expr::Expr::Builtin(("car", builtin_car)));
+    env.set("cdr", expr::Expr::Builtin(("cdr", builtin_cdr)));
 
     loop {
         eprint!("> ");

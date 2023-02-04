@@ -4,16 +4,15 @@ use crate::expr::Expr;
 #[derive(Debug)]
 pub enum EvalError {
     UndefinedSymbol(String),
-    SyntaxError,
     ArgumentError,
     TypeError,
 }
 
 pub fn eval(expr: &Expr, env: &mut Env) -> Result<Expr, EvalError> {
     match expr {
-        Expr::Integer(_) => Ok(expr.clone()),
         Expr::Symbol(s) => eval_symbol(s, env),
         Expr::List(exprs) => eval_list(exprs, env),
+        _ => Ok(expr.clone()),
     }
 }
 
@@ -23,16 +22,24 @@ fn eval_symbol(s: &str, env: &mut Env) -> Result<Expr, EvalError> {
 
 fn eval_list(args: &[Expr], env: &mut Env) -> Result<Expr, EvalError> {
     let (op, rest) = args.split_at(1);
+    let op = &op[0];
 
-    if let Expr::Symbol(ref sym) = op[0] {
+    if let Expr::Symbol(ref sym) = op {
         match sym.as_str() {
-            "define" => eval_define(rest, env),
-            "quote" => eval_quote(rest, env),
-            _ => Err(EvalError::SyntaxError),
+            "define" => return eval_define(rest, env),
+            "quote" => return eval_quote(rest, env),
+            _ => (),
         }
-    } else {
-        Err(EvalError::SyntaxError)
     }
+
+    // Evaluate all arguments
+    let op = eval(op, env)?;
+    let rest = rest
+        .iter()
+        .map(|arg| eval(arg, env))
+        .collect::<Result<Vec<_>, EvalError>>()?;
+
+    apply(&op, &rest)
 }
 
 fn eval_define(args: &[Expr], env: &mut Env) -> Result<Expr, EvalError> {
@@ -53,17 +60,17 @@ fn eval_quote(args: &[Expr], _env: &mut Env) -> Result<Expr, EvalError> {
     }
 }
 
-fn expect_symbol(e: &Expr) -> Result<&String, EvalError> {
-    if let Expr::Symbol(s) = e {
-        Ok(s)
+fn apply(op: &Expr, args: &[Expr]) -> Result<Expr, EvalError> {
+    if let Expr::Builtin((_, fun)) = op {
+        fun(args)
     } else {
         Err(EvalError::TypeError)
     }
 }
 
-fn expect_list(e: &Expr) -> Result<&Vec<Expr>, EvalError> {
-    if let Expr::List(l) = e {
-        Ok(l)
+fn expect_symbol(e: &Expr) -> Result<&String, EvalError> {
+    if let Expr::Symbol(s) = e {
+        Ok(s)
     } else {
         Err(EvalError::TypeError)
     }
