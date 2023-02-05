@@ -7,7 +7,7 @@ This is meant to be a very simple Lisp interpreter I can use as a starting point
 - [ ] language docs
 - [ ] test suite
 - [x] REPL
-- [ ] multiline input
+- [x] multiline input
 - [ ] cons data structure
 - [x] define
 - [x] quote
