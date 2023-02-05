@@ -12,5 +12,5 @@ pub fn builtin_cdr(args: &[Expr]) -> Result<Expr, EvalError> {
     expect_args(args, 1)?;
     let list = expect_list(&args[0])?;
 
-    Ok(Expr::new_list(list.clone().split_off(1)))
+    Ok(Expr::new_list(&list[1..]))
 }

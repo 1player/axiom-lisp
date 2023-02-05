@@ -1,13 +1,17 @@
+use std::borrow::Cow;
+
 use crate::eval::EvalError;
 
-type BuiltinFn = fn(&[Expr]) -> Result<Expr, EvalError>;
+pub type Builtin = fn(&[Expr]) -> Result<Expr, EvalError>;
+pub type Integer = isize;
+pub type Symbol = String;
 pub type List = Vec<Expr>;
 
 #[derive(Clone)]
 pub enum Expr {
-    Builtin((&'static str, BuiltinFn)),
-    Integer(isize),
-    Symbol(String),
+    Builtin((&'static str, Builtin)),
+    Integer(Integer),
+    Symbol(Symbol),
     List(List),
 }
 
@@ -51,12 +55,16 @@ impl PartialEq for Expr {
 }
 
 impl Expr {
-    pub fn new_symbol(s: &str) -> Expr {
-        Expr::Symbol(s.to_owned())
+    pub fn new_symbol<'a, T: Into<Cow<'a, str>>>(s: T) -> Expr {
+        Expr::Symbol(s.into().into_owned())
     }
 
-    pub fn new_list(l: Vec<Expr>) -> Expr {
-        Expr::List(l)
+    pub fn new_list<'a, T: Into<Cow<'a, [Expr]>>>(l: T) -> Expr {
+        Expr::List(l.into().into_owned())
+    }
+
+    pub fn new_integer(n: Integer) -> Expr {
+        Expr::Integer(n)
     }
 }
 
@@ -66,25 +74,25 @@ mod tests {
 
     #[test]
     fn test_display() {
-        assert_eq!(Expr::Symbol("a".into()).to_string(), "a");
+        assert_eq!(Expr::new_symbol("a").to_string(), "a");
         assert_eq!(
-            Expr::List(vec![Expr::Symbol("a".into())]).to_string(),
+            Expr::new_list(vec![Expr::new_symbol("a")]).to_string(),
             "(a)"
         );
         assert_eq!(
-            Expr::List(vec![Expr::Symbol("a".into()), Expr::Symbol("b".into())]).to_string(),
+            Expr::new_list(vec![Expr::new_symbol("a"), Expr::new_symbol("b")]).to_string(),
             "(a b)"
         );
         assert_eq!(
             Expr::List(vec![
-                Expr::Symbol("values".into()),
-                Expr::Symbol("b".into()),
-                Expr::List(vec![
-                    Expr::Symbol("+".into()),
-                    Expr::Integer(1),
-                    Expr::Symbol("b".into())
+                Expr::new_symbol("values"),
+                Expr::new_symbol("b"),
+                Expr::new_list(vec![
+                    Expr::new_symbol("+"),
+                    Expr::new_integer(1),
+                    Expr::new_symbol("b")
                 ],),
-                Expr::Symbol("c".into())
+                Expr::new_symbol("c")
             ])
             .to_string(),
             "(values b (+ 1 b) c)"
