@@ -1,24 +1,4 @@
-mod builtin;
-mod env;
-mod eval;
-mod expr;
-mod read;
-
-use builtin::*;
-
-fn create_toplevel() -> env::Env {
-    let mut env = env::Env::new(None);
-
-    env.set("car", expr::Expr::Builtin(("car", builtin_car)));
-    env.set("cdr", expr::Expr::Builtin(("cdr", builtin_cdr)));
-
-    env.set("+", expr::Expr::Builtin(("+", builtin_add)));
-    env.set("-", expr::Expr::Builtin(("-", builtin_sub)));
-    env.set("/", expr::Expr::Builtin(("/", builtin_div)));
-    env.set("*", expr::Expr::Builtin(("*", builtin_mul)));
-
-    env
-}
+use axiom::*;
 
 fn repl() {
     let mut buf = String::new();
