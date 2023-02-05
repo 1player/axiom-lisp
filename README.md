@@ -7,8 +7,11 @@ This is meant to be a very simple Lisp interpreter I can use as a starting point
 - [ ] language docs
 - [ ] test suite
 - [x] REPL
+- [ ] multiline input
+- [ ] cons data structure
 - [x] define
 - [x] quote
+- [ ] let
 - [x] car/cdr
 - [x] basic integer functions
 - [ ] equality
@@ -18,8 +21,3 @@ This is meant to be a very simple Lisp interpreter I can use as a starting point
 - [ ] quasiquote
 - [ ] macros
 
-## Gotchas
-
-Lists are actually array.
-
-I'm still debating whether it makes sense to turn them into linked lists. I like arrays better, but the prepending `cons` would be an unacceptable *O(n)* operation.
