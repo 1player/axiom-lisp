@@ -21,7 +21,6 @@ fn next_token(reader: &mut impl std::io::BufRead) -> Result<Option<Token>, ReadE
     let mut bytes_read = 0;
     let mut token = None;
 
-    // TODO: error checking
     let buf = reader.fill_buf().map_err(|_| ReadError::IOError)?;
     let input = std::str::from_utf8(buf).map_err(|_| ReadError::InvalidUTF8)?;
 
