@@ -85,7 +85,7 @@ pub fn expect_list(e: &Expr) -> Result<&List, EvalError> {
 }
 
 pub fn expect_args(args: &[Expr], count: usize) -> Result<(), EvalError> {
-    if args.len() != count {
+    if args.len() == count {
         Ok(())
     } else {
         Err(EvalError::ArgumentError)
