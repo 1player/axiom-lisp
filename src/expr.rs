@@ -1,13 +1,14 @@
 use crate::eval::EvalError;
 
 type BuiltinFn = fn(&[Expr]) -> Result<Expr, EvalError>;
+pub type List = Vec<Expr>;
 
 #[derive(Clone)]
 pub enum Expr {
     Builtin((&'static str, BuiltinFn)),
     Integer(isize),
     Symbol(String),
-    List(Vec<Expr>),
+    List(List),
 }
 
 impl std::fmt::Display for Expr {
@@ -52,6 +53,10 @@ impl PartialEq for Expr {
 impl Expr {
     pub fn new_symbol(s: &str) -> Expr {
         Expr::Symbol(s.to_owned())
+    }
+
+    pub fn new_list(l: Vec<Expr>) -> Expr {
+        Expr::List(l)
     }
 }
 
