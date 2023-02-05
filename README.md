@@ -1,17 +1,21 @@
-Mum said it was my turn to implement a Lisp.
+Mum said it was my turn to write a Lisp.
 
 This is meant to be a very simple Lisp interpreter I can use as a starting point for more advanced implementations.
 
 ## Features
 
+- [ ] language docs
+- [ ] test suite
 - [x] REPL
 - [x] define
-- [x] car/cdr
 - [x] quote
-- [ ] quasiquote
-- [ ] basic integer functions
+- [x] car/cdr
+- [x] basic integer functions
+- [ ] equality
+- [ ] basic boolean functions
 - [ ] if
 - [ ] closures
+- [ ] quasiquote
 - [ ] macros
 
 ## Gotchas
