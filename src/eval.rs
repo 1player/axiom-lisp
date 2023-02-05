@@ -1,5 +1,5 @@
 use crate::env::Env;
-use crate::expr::{Expr, List};
+use crate::expr::*;
 
 #[derive(Debug)]
 pub enum EvalError {
@@ -68,7 +68,7 @@ fn apply(op: &Expr, args: &[Expr]) -> Result<Expr, EvalError> {
     }
 }
 
-fn expect_symbol(e: &Expr) -> Result<&String, EvalError> {
+fn expect_symbol(e: &Expr) -> Result<&Symbol, EvalError> {
     if let Expr::Symbol(s) = e {
         Ok(s)
     } else {
@@ -79,6 +79,14 @@ fn expect_symbol(e: &Expr) -> Result<&String, EvalError> {
 pub fn expect_list(e: &Expr) -> Result<&List, EvalError> {
     if let Expr::List(l) = e {
         Ok(l)
+    } else {
+        Err(EvalError::TypeError)
+    }
+}
+
+pub fn expect_integer(e: &Expr) -> Result<Integer, EvalError> {
+    if let Expr::Integer(n) = e {
+        Ok(*n)
     } else {
         Err(EvalError::TypeError)
     }

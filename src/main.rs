@@ -6,12 +6,23 @@ mod read;
 
 use builtin::*;
 
-fn repl() {
-    let mut buf = String::new();
+fn create_toplevel() -> env::Env {
     let mut env = env::Env::new(None);
 
     env.set("car", expr::Expr::Builtin(("car", builtin_car)));
     env.set("cdr", expr::Expr::Builtin(("cdr", builtin_cdr)));
+
+    env.set("+", expr::Expr::Builtin(("+", builtin_add)));
+    env.set("-", expr::Expr::Builtin(("-", builtin_sub)));
+    env.set("/", expr::Expr::Builtin(("/", builtin_div)));
+    env.set("*", expr::Expr::Builtin(("*", builtin_mul)));
+
+    env
+}
+
+fn repl() {
+    let mut buf = String::new();
+    let mut env = create_toplevel();
 
     loop {
         eprint!("> ");
