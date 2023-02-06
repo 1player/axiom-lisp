@@ -93,7 +93,7 @@ pub fn read_buffer(reader: &mut impl std::io::BufRead) -> Result<Expr, ReadError
                 }
             }
             Token::Atom(atom) => {
-                let expr = parse_atom(&atom)?;
+                let expr = parse_atom(atom)?;
                 if let Some(i) = index {
                     expr_stack[i].push(expr);
                 } else {
@@ -110,11 +110,11 @@ pub fn read_buffer(reader: &mut impl std::io::BufRead) -> Result<Expr, ReadError
     }
 }
 
-fn parse_atom(atom: &str) -> Result<Expr, ReadError> {
+fn parse_atom(atom: String) -> Result<Expr, ReadError> {
     // try parsing as an integer first
     match atom.parse::<isize>() {
         Ok(n) => Ok(Expr::Integer(n)),
-        _ => Ok(Expr::Symbol((*atom).to_owned())),
+        _ => Ok(Expr::Symbol(atom)),
     }
 }
 
